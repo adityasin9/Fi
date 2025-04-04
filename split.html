@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Split a Bill</title>
+    <style>
+        body {
+            background: url('code.png') no-repeat center center fixed;
+            font-family: Arial, sans-serif;
+            background-color: #f8fafc;
+            padding: 30px;
+            text-align: center;
+            color: #333;
+        }
+        .box {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📊 Split a Bill</h1>
+    <div class="box">
+        <button onclick="splitBill()">➗ Start Bill Splitting</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Paid</th>
+                    <th>Owes/Receive</th>
+                </tr>
+            </thead>
+            <tbody id="billTable"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function splitBill() {
+            const numPeople = parseInt(prompt("Enter number of people:"));
+            if (isNaN(numPeople) || numPeople <= 0) return;
+
+            let people = [];
+            let totalPaid = 0;
+
+            for (let i = 0; i < numPeople; i++) {
+                const name = prompt(`Enter name of person ${i + 1}:`);
+                const amountPaid = parseFloat(prompt(`Enter amount paid by ${name}:`));
+                if (!name || isNaN(amountPaid) || amountPaid < 0) return;
+                people.push({ name, amountPaid });
+                totalPaid += amountPaid;
+            }
+
+            const perPersonShare = totalPaid / numPeople;
+            let tableBody = document.getElementById("billTable");
+            tableBody.innerHTML = "";
+
+            people.forEach(person => {
+                const owes = perPersonShare - person.amountPaid;
+                let status = owes > 0 ? `Owes $${owes.toFixed(2)}` : `Receives $${Math.abs(owes).toFixed(2)}`;
+                let row = `<tr><td>${person.name}</td><td>$${person.amountPaid.toFixed(2)}</td><td>${status}</td></tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+    </script>
+
+</body>
+</html>

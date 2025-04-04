@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: url('code.png') no-repeat center center fixed;
+            background-size: cover;
+            background-color: #f8fafc;
+            text-align: center;
+            padding: 30px;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90%;
+            max-width: 1000px;
+            margin: auto;
+        }
+        .top-section {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            width: 100%;
+        }
+        .box {
+            background: rgb(205, 201, 201);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            margin: 10px 0;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+        }
+        .chart-box, .transactions-box, .split-box {
+            flex: 1;
+            min-width: 300px;
+        }
+        canvas#financeChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        h1 {
+            color: #007bff;
+        }
+        .balance-box {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2e8b57;
+            background: #e6f7f1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-success { background-color: #28a745; color: white; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-primary { background-color: #007bff; color: white; }
+        ul { list-style: none; padding: 0; }
+        li { background: white; margin: 5px 0; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); }
+        .btn-delete { background: #ff4d4d; color: white; font-size: 12px; padding: 5px 10px; border: none; margin-left: 10px; cursor: pointer; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #007bff; color: white; }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+            }
+            .box {
+                padding: 10px;
+            }
+            .top-section {
+                flex-direction: column;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>💰 Finance Dashboard</h1>
+
+    <div class="container">
+        <div class="top-section">
+            <!-- Graph Section -->
+            <div class="box chart-box">
+                <h3>📊 Income vs Expenses vs Loan</h3>
+                <div class="chart-container">
+                    <canvas id="financeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Transactions Section -->
+            <div class="box transactions-box">
+                <div class="balance-box">
+                    Current Balance: $<span id="balance">0</span>
+                </div>
+
+                <button class="btn-success" onclick="addIncome()">➕ Add Income</button>
+                <button class="btn-danger" onclick="addExpense()">➖ Add Expense</button>
+                <button class="btn-primary" onclick="addLoan()">💳 Add Loan</button>
+
+                <h3>Transactions</h3>
+                <ul id="transactionsList"></ul>
+            </div>
+
+          
+
+    <script>
+        let balance = 0;
+        let incomeTotal = 0;
+        let expenseTotal = 0;
+        let loanTotal = 0;
+        let chart;
+        const PASSWORD = "1234";
+
+        function updateBalance() {
+            document.getElementById("balance").innerText = balance.toFixed(2);
+        }
+
+        function updateChart() {
+            if (chart) chart.destroy();
+            let ctx = document.getElementById("financeChart").getContext("2d");
+            chart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: ["Income", "Expenses", "Loans"],
+                    datasets: [{
+                        label: "Amount",
+                        data: [incomeTotal, expenseTotal, loanTotal],
+                        backgroundColor:["#A8E6CF", "#FFAAA5", "#FFD3B6"]
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function addIncome() {
+            const source = prompt("Enter Income Source:");
+            const amount = parseFloat(prompt("Enter Income Amount:"));
+            if (!source || isNaN(amount) || amount <= 0) return;
+
+            balance += amount;
+            incomeTotal += amount;
+            updateBalance();
+            updateChart();
+
+            const listItem = document.createElement("li");
+            listItem.innerText = `✅ Income from ${source}: +$${amount}`;
+            document.getElementById("transactionsList").appendChild(listItem);
+        }
+
+        function addExpense() {
+            const name = prompt("Enter Expense Name:");
+            const amount = parseFloat(prompt("Enter Expense Amount:"));
+            if (!name || isNaN(amount) || amount <= 0) return;
+
+            balance -= amount;
+            expenseTotal += amount;
+            updateBalance();
+            updateChart();
+
+            const listItem = document.createElement("li");
+            listItem.innerText = `❌ Expense for ${name}: -$${amount}`;
+            document.getElementById("transactionsList").appendChild(listItem);
+        }
+
+        function addLoan() {
+            const person = prompt("Enter Borrower's Name:");
+            const amount = parseFloat(prompt("Enter Loan Amount:"));
+            const reason = prompt("Enter Reason for Loan:");
+            if (!person || isNaN(amount) || amount <= 0 || !reason) return;
+
+            balance -= amount;
+            loanTotal += amount;
+            updateBalance();
+            updateChart();
+
+            const listItem = document.createElement("li");
+            listItem.innerHTML = `💳 Loan to ${person} ($${amount}) for ${reason} <button class="btn-delete" onclick="clearLoan(${amount}, this)">Clear</button>`;
+            document.getElementById("transactionsList").appendChild(listItem);
+        }
+
+        function clearLoan(amount, button) {
+            const enteredPassword = prompt("Enter Password to Clear Loan:");
+            if (enteredPassword === PASSWORD) {
+                balance += amount;
+                loanTotal -= amount;
+                updateBalance();
+                updateChart();
+                button.parentElement.remove();
+                alert("Loan cleared successfully!");
+            } else {
+                alert("Incorrect Password! Loan not cleared.");
+            }
+        }
+
+     
+
+        updateChart();
+    </script>
+
+</body>
+</html>
